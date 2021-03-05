@@ -6,7 +6,7 @@
 #
 # Created:     03/03/2021
 # Copyright:   (c) Richard Li 2021
-# Licence:     MIT Licence
+# Licence:     MIT License (see LICENSE file)
 #-------------------------------------------------------------------------------
 import numpy
 

@@ -6,7 +6,7 @@
 #
 # Created:     11/02/2021
 # Copyright:   (c) Richard Li 2021
-# Licence:     MIT Licence
+# Licence:     MIT License (see LICENSE file)
 #-------------------------------------------------------------------------------
 import random
 import math
@@ -16,8 +16,8 @@ from PIL import Image
 
 start = time.time()
 
-down = 250
-up = 250
+up = 200
+down = 600
 #center is the remaining probability
 
 #generates random list of points
@@ -29,7 +29,7 @@ y = 32768
 for i in range (0, 32768):
     where = random.randint(0, 1000)
     pointlist.append([x, y])
-    if where <= up:
+    if where <= down:
         y += 1
     elif where <= (up+down):
         y -= 1

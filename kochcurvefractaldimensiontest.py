@@ -6,7 +6,7 @@
 #
 # Created:     11/02/2021
 # Copyright:   (c) Richard Li 2021
-# Licence:     MIT Licence
+# Licence:     MIT License (see LICENSE file)
 #-------------------------------------------------------------------------------
 import random
 import math
