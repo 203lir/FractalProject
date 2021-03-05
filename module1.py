@@ -16,17 +16,17 @@ from PIL import Image
 
 start = time.time()
 
-down = 0
-up = 500
+down = 250
+up = 250
 #center is the remaining probability
 
 #generates random list of points
 pointlist = []
 
 x = 0
-y = 16384
+y = 32768
 
-for i in range (0, 16384):
+for i in range (0, 32768):
     where = random.randint(0, 1000)
     pointlist.append([x, y])
     if where <= up:
@@ -35,39 +35,48 @@ for i in range (0, 16384):
         y -= 1
     x += 1
 
-framesize = [16384, 32768]
+framesize = [32768, 65536]
 
 #boxsize is distance from center to edges
 def checkboxes(boxsize, pointlist):
+    #number of boxes which will be created in each direction
     xboxnum = int(framesize[0]/(boxsize*2))
     yboxnum = int(framesize[1]/(boxsize*2))
     boxlist = []
+    #creates boxes
     for i in range (xboxnum):
         addtoboxlist = [2*i*boxsize+boxsize]
         for j in range (yboxnum):
             addtoboxlist.append([2*j*boxsize+boxsize, False])
         boxlist.append(addtoboxlist)
+    #initializes previousx and previousy (purpose of these variables is in a later comment)
     previousx = 0
     previousy = int(yboxnum/2)
+    #looks through points, and checks to see if they are in a box
     for a in pointlist:
         for b in range ((previousx-2), (previousx+3)):
             for c in range ((previousy-2), (previousy+3)):
+                #makes sure nothing weird is happening with b and c
                 if b >= 0  and b <= xboxnum:
                     if c >= 1 and c <= yboxnum:
                         x = boxlist[b][0]
                         y = boxlist[b][c][0]
+                        #checks if point is in box
                         if a[0] >= (x-boxsize):
                             if a[0] <= (x+boxsize):
                                 if a[1] >= (y-boxsize):
                                     if a[1] <= (y+boxsize):
+                                        #marks the box the point is in as being "True"
                                         boxlist[b][c][1] = True
                                         break
             else:
                 continue
             break
+        #we know that the next point of the random walk will be near the current point, which means that we only have to check boxes relatively near the current point in order to have checked all boxes possible for the next point to be in; this significantly improves the speed of the program, instead of checking if the point is in every single box
         previousx = b
         previousy = c
 
+    #counts how many boxes there are points in
     counter = 0
     for b in boxlist:
         for c in b:
@@ -81,14 +90,16 @@ def checkboxes(boxsize, pointlist):
 #delogged data to analyze
 boxnumlist = []
 for i in range (9, 13):
-    boxsize = 16384/(2**i)
-    boxscale = i-9
+    boxsize = 32768/(2**i)
+    #we take log base 2 of all the numbers, then do a linear regression, in order to find an exponential regression of the data as a whole
+    #this means that we can just use i as the x axis, instead of messing around with exponents and logs here
+    boxscale = i
     numberofboxestouched = checkboxes(boxsize, pointlist)
-    print(boxsize, i-9, numberofboxestouched, math.log2(numberofboxestouched))
     boxnumlist.append([boxscale, math.log2(numberofboxestouched)])
 
 #linear regression on delogged data
 #see Griswold's notes on linear regression
+#this part of the code finds the SSR, and creates the first quadratic equation
 linearTerm = 0
 aCoefficient = 0
 bCoefficient = 0
@@ -129,17 +140,24 @@ extranewACoefficient = aCoefficient1
 extranewLinearTerm2 = linearTerm1
 a = (extranewLinearTerm2-extranewLinearTerm1)/extranewACoefficient
 
-print(a, b)
+print("Fractal dimension: ", a)
+
 
 #creates image
-MyImg =Image.new('RGB', (16384, 32767), "white")
+MyImg = Image.new('RGB', (1024, 2048), "white")
 pixels = MyImg.load()
-for a in pointlist:
+
+scaledpointlist = []
+#cuts off most of the data, since otherwise the image would be huge and unusable
+for n in pointlist:
+    if n[0] < 1024:
+        scaledpointlist.append([n[0], n[1]-31744])
+
+for a in scaledpointlist:
     pixels[a[0], a[1]] = (0, 0, 0)
-#MyImg.show()
 MyImg.save('graph.jpg', quality=95)
 
-print(time.time()-start)
+print("Time taken: ", time.time()-start)
 
 
 

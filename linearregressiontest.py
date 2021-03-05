@@ -1,15 +1,16 @@
 #-------------------------------------------------------------------------------
 # Name:        module1
-# Purpose:
+# Purpose:     This program tests the linear regression part of the program in module1, in order to make sure it is working as intended
 #
 # Author:      Richard Li
 #
 # Created:     03/03/2021
 # Copyright:   (c) Richard Li 2021
-# Licence:     <your licence>
+# Licence:     MIT Licence
 #-------------------------------------------------------------------------------
 import numpy
 
+#this data was taken from Griswold's notes
 boxnumlist = [[0, 2], [1, -1], [3, -2]]
 
 linearTerm = 0

@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Name:        module1
-# Purpose:
+# Purpose:     This code tests the program in module1 with a known fractal, in order to make sure that it works correctly
 #
 # Author:      Richard Li
 #
@@ -16,7 +16,7 @@ from PIL import Image
 
 start = time.time()
 
-#this code was stolen from stack exchaneg
+#this code was taken from stack exchange, and creates a koch snowflake
 def kochenize(a,b):
     HFACTOR = (3**0.5)/6
     dx = b[0] - a[0]
@@ -49,6 +49,8 @@ def koch(steps, width):
 
 TOTALWIDTH = 16384
 
+#the rest of the code was not taken from stack exchange
+
 notpointlist = koch(10, TOTALWIDTH)
 pointlist = []
 for a in notpointlist:
@@ -56,8 +58,6 @@ for a in notpointlist:
     bruh1 = a[1]
     pointlist.append([bruh0+8192, bruh1])
 print(pointlist[0])
-
-#the rest of the code was not stolen from stack exchange
 
 framesize = [16384, 16384]
 
