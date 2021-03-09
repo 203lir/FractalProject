@@ -16,8 +16,8 @@ from PIL import Image
 
 start = time.time()
 
-up = 200
-down = 600
+up = 400
+down = 400
 #center is the remaining probability
 
 #generates random list of points
@@ -30,9 +30,9 @@ for i in range (0, 32768):
     where = random.randint(0, 1000)
     pointlist.append([x, y])
     if where <= down:
-        y += 1
+        y += 6
     elif where <= (up+down):
-        y -= 1
+        y -= 6
     x += 1
 
 framesize = [32768, 65536]
@@ -76,7 +76,8 @@ def checkboxes(boxsize, pointlist):
         previousx = b
         previousy = c
 
-    #counts how many boxes there are points in
+    #counts how many boxes there are points in, and returns a list of points to be highlighted
+    highlightedpointlist = []
     counter = 0
     for b in boxlist:
         for c in b:
@@ -85,7 +86,32 @@ def checkboxes(boxsize, pointlist):
             else:
                 if c[1] == True:
                     counter += 1
-    return counter
+                    for i0 in range (int(b[0]-boxsize), int(b[0]+boxsize)):
+                        for i1 in range (int(c[0]-boxsize), int(c[0]+boxsize)):
+                            highlightedpointlist.append([i0, i1])
+    return [counter, highlightedpointlist]
+
+#creates image
+def createimage (pointlist, highlightedpointlist, name):
+    MyImg = Image.new('RGB', (1024, 2048), "white")
+    pixels = MyImg.load()
+
+    scaledpointlist = []
+    #cuts off most of the data, since otherwise the image would be huge and unusable
+    for n in pointlist:
+        if n[0] < 1024:
+            scaledpointlist.append([n[0], n[1]-31744])
+
+    for b in numberofboxestouched[1]:
+        if b[1] > 31744 and b[1] < 33792:
+            if b[0] < 1024:
+                pixels[b[0], b[1]-31744] = (250, 200, 21)
+
+    for a in scaledpointlist:
+        pixels[a[0], a[1]] = (0, 0, 0)
+
+    imagename = name + ".jpg"
+    MyImg.save(imagename, quality=95)
 
 #delogged data to analyze
 boxnumlist = []
@@ -95,7 +121,8 @@ for i in range (9, 13):
     #this means that we can just use i as the x axis, instead of messing around with exponents and logs here
     boxscale = i
     numberofboxestouched = checkboxes(boxsize, pointlist)
-    boxnumlist.append([boxscale, math.log2(numberofboxestouched)])
+    createimage(pointlist, numberofboxestouched[1], str(i-9))
+    boxnumlist.append([boxscale, math.log2(numberofboxestouched[0])])
 
 #linear regression on delogged data
 #see Griswold's notes on linear regression
@@ -141,22 +168,7 @@ extranewLinearTerm2 = linearTerm1
 a = (extranewLinearTerm2-extranewLinearTerm1)/extranewACoefficient
 
 print("Fractal dimension: ", a)
-
-
-#creates image
-MyImg = Image.new('RGB', (1024, 2048), "white")
-pixels = MyImg.load()
-
-scaledpointlist = []
-#cuts off most of the data, since otherwise the image would be huge and unusable
-for n in pointlist:
-    if n[0] < 1024:
-        scaledpointlist.append([n[0], n[1]-31744])
-
-for a in scaledpointlist:
-    pixels[a[0], a[1]] = (0, 0, 0)
-MyImg.save('graph.jpg', quality=95)
-
+print(boxnumlist)
 print("Time taken: ", time.time()-start)
 
 
