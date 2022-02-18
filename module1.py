@@ -16,6 +16,19 @@ from PIL import Image
 
 start = time.time()
 
+print("MIT License")
+print("")
+print("Copyright © 2021 Richard Li")
+print("")
+print("Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:")
+print("")
+print("The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.")
+print("")
+print("THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.")
+print("")
+print("")
+print("Running...")
+
 up = 400
 down = 400
 #center is the remaining probability
@@ -30,9 +43,9 @@ for i in range (0, 32768):
     where = random.randint(0, 1000)
     pointlist.append([x, y])
     if where <= down:
-        y += 6
+        y += 1
     elif where <= (up+down):
-        y -= 6
+        y -= 1
     x += 1
 
 framesize = [32768, 65536]
@@ -88,7 +101,9 @@ def checkboxes(boxsize, pointlist):
                     counter += 1
                     for i0 in range (int(b[0]-boxsize), int(b[0]+boxsize)):
                         for i1 in range (int(c[0]-boxsize), int(c[0]+boxsize)):
-                            highlightedpointlist.append([i0, i1])
+                            if i0+1 < 1024:
+                                if i1 > 31745 and i1-1 < 33793:
+                                    highlightedpointlist.append([i0+1, i1-31745])
     return [counter, highlightedpointlist]
 
 #creates image
@@ -103,9 +118,7 @@ def createimage (pointlist, highlightedpointlist, name):
             scaledpointlist.append([n[0], n[1]-31744])
 
     for b in numberofboxestouched[1]:
-        if b[1] > 31744 and b[1] < 33792:
-            if b[0] < 1024:
-                pixels[b[0], b[1]-31744] = (250, 200, 21)
+        pixels[b[0], b[1]] = (250, 200, 21)
 
     for a in scaledpointlist:
         pixels[a[0], a[1]] = (0, 0, 0)
@@ -115,13 +128,14 @@ def createimage (pointlist, highlightedpointlist, name):
 
 #delogged data to analyze
 boxnumlist = []
-for i in range (9, 13):
+for i in range (6, 15):
     boxsize = 32768/(2**i)
     #we take log base 2 of all the numbers, then do a linear regression, in order to find an exponential regression of the data as a whole
     #this means that we can just use i as the x axis, instead of messing around with exponents and logs here
     boxscale = i
     numberofboxestouched = checkboxes(boxsize, pointlist)
-    createimage(pointlist, numberofboxestouched[1], str(i-9))
+    #a bit inefficient getting a list of points first then creating an image, but this can be solved "in hardware"
+    createimage(pointlist, numberofboxestouched[1], str(i-6))
     boxnumlist.append([boxscale, math.log2(numberofboxestouched[0])])
 
 #linear regression on delogged data
@@ -168,7 +182,7 @@ extranewLinearTerm2 = linearTerm1
 a = (extranewLinearTerm2-extranewLinearTerm1)/extranewACoefficient
 
 print("Fractal dimension: ", a)
-print(boxnumlist)
+#print(boxnumlist)
 print("Time taken: ", time.time()-start)
 
 

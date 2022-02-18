@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Name:        module1
-# Purpose:     This code tests the program in module1 with a known fractal, in order to make sure that it works correctly
+# Purpose:     tests the code with a known fractal
 #
 # Author:      Richard Li
 #
@@ -57,41 +57,50 @@ for a in notpointlist:
     bruh0 = a[0]
     bruh1 = a[1]
     pointlist.append([bruh0+8192, bruh1])
-print(pointlist[0])
 
-framesize = [16384, 16384]
+framesize = [32768, 32768]
 
 #boxsize is distance from center to edges
 def checkboxes(boxsize, pointlist):
+    #number of boxes which will be created in each direction
     xboxnum = int(framesize[0]/(boxsize*2))
     yboxnum = int(framesize[1]/(boxsize*2))
     boxlist = []
+    #creates boxes
     for i in range (xboxnum):
         addtoboxlist = [2*i*boxsize+boxsize]
         for j in range (yboxnum):
             addtoboxlist.append([2*j*boxsize+boxsize, False])
         boxlist.append(addtoboxlist)
+    #initializes previousx and previousy (purpose of these variables is in a later comment)
     previousx = 0
     previousy = 0
+    #looks through points, and checks to see if they are in a box
     for a in pointlist:
         for b in range ((previousx-2), (previousx+3)):
             for c in range ((previousy-2), (previousy+3)):
+                #makes sure nothing weird is happening with b and c
                 if b >= 0  and b <= xboxnum:
                     if c >= 1 and c <= yboxnum:
                         x = boxlist[b][0]
                         y = boxlist[b][c][0]
+                        #checks if point is in box
                         if a[0] >= (x-boxsize):
                             if a[0] <= (x+boxsize):
                                 if a[1] >= (y-boxsize):
                                     if a[1] <= (y+boxsize):
+                                        #marks the box the point is in as being "True"
                                         boxlist[b][c][1] = True
                                         break
             else:
                 continue
             break
+        #we know that the next point of the random walk will be near the current point, which means that we only have to check boxes relatively near the current point in order to have checked all boxes possible for the next point to be in; this significantly improves the speed of the program, instead of checking if the point is in every single box
         previousx = b
         previousy = c
 
+    #counts how many boxes there are points in, and returns a list of points to be highlighted
+    highlightedpointlist = []
     counter = 0
     for b in boxlist:
         for c in b:
@@ -100,19 +109,21 @@ def checkboxes(boxsize, pointlist):
             else:
                 if c[1] == True:
                     counter += 1
-    return counter
+    return [counter, highlightedpointlist]
 
 #delogged data to analyze
 boxnumlist = []
-for i in range (9, 13):
-    boxsize = 16384/(2**i)
-    boxscale = i-9
+for i in range (2, 13):
+    boxsize = 32768/(2**i)
+    #we take log base 2 of all the numbers, then do a linear regression, in order to find an exponential regression of the data as a whole
+    #this means that we can just use i as the x axis, instead of messing around with exponents and logs here
+    boxscale = i
     numberofboxestouched = checkboxes(boxsize, pointlist)
-    print(boxsize, i-9, numberofboxestouched, math.log2(numberofboxestouched))
-    boxnumlist.append([boxscale, math.log2(numberofboxestouched)])
+    boxnumlist.append([boxscale, math.log2(numberofboxestouched[0])])
 
 #linear regression on delogged data
 #see Griswold's notes on linear regression
+#this part of the code finds the SSR, and creates the first quadratic equation
 linearTerm = 0
 aCoefficient = 0
 bCoefficient = 0
@@ -153,17 +164,9 @@ extranewACoefficient = aCoefficient1
 extranewLinearTerm2 = linearTerm1
 a = (extranewLinearTerm2-extranewLinearTerm1)/extranewACoefficient
 
-print(a, b)
-
-#creates image
-MyImg =Image.new('RGB', (16384, 32767), "white")
-pixels = MyImg.load()
-for a in pointlist:
-    pixels[a[0], a[1]] = (0, 0, 0)
-#MyImg.show()
-MyImg.save('graph.jpg', quality=95)
-
-print(time.time()-start)
+print("Fractal dimension: ", a)
+print(boxnumlist)
+print("Time taken: ", time.time()-start)
 
 
 
